@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a, #34495e);
+            color: white;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        /* Calculator Styling */
+        .calculator {
+            background: #2c3e50;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .calculator:hover {
+            transform: scale(1.05);
+        }
+
+        /* Display Box */
+        .display {
+            width: 100;
+            padding: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            background: #34495e;
+            border-radius: 10px;
+            color: #ecf0f1;
+            min-height: 60px;
+            word-wrap: break-word;
+            overflow-x: auto;
+            text-align: right;
+        }
+
+        /* Button Grid Layout */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Button Styles */
+        .buttons button {
+            padding: 20px;
+            font-size: 1.4em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            background-color: #1abc9c;
+            color: white;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .buttons button:hover {
+            background-color: #16a085;
+            transform: translateY(-3px);
+        }
+
+        .buttons button:active {
+            background-color: #1abc9c;
+            transform: translateY(3px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .calculator {
+                width: 90%;
+                padding: 20px;
+            }
+            .display {
+                font-size: 1.8em;
+            }
+            .buttons button {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio Source -->
+    <audio id="song" preload="auto">
+        <source src="https://www.dropbox.com/scl/fi/8ml8ji46f46iwf378wene/spotify-Bulong-December-Avenue.m4a?rlkey=w3dvs5qcumdis2j83kas8omor&st=6g231ml7&raw=1" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Calculator -->
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="appendToDisplay('(')">(</button>
+            <button onclick="appendToDisplay(')')">)</button>
+            <button onclick="appendToDisplay('/')">/</button>
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('*')">*</button>
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('-')">-</button>
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="appendToDisplay('+')">+</button>
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        // Lyrics Data
+        const lyrics = [
+            { time: 0.82 - 2, text: "Hindi masabi ang nararamdaman" },
+            { time: 12.92 - 2, text: "Hindi makalapit, sadyang nanginginig na lang" },
+            { time: 20.63 - 2, text: "Mga kamay na sabik sa piling mo" },
+            { time: 26.51 - 2, text: "Ang iyong matang walang mintis" },
+            { time: 31.27 - 2, text: "Sa pagtigil ng aking mundo" },
+            { time: 35.52 - 2, text: "Ako'y alipin ng pag-ibig mo" },
+            { time: 42.13 - 2, text: "Handang ibigin ang 'sang tulad mo" },
+            { time: 49.63 - 2, text: "Hangga't ang puso mo'y sa akin lang" },
+            { time: 53.88 - 2, text: "Hindi ka na malilinlang" },
+            { time: 57.45 - 2, text: "Ikaw ang ilaw sa dilim" },
+            { time: 62.99 - 2, text: "At ang liwanag ng mga bituin" },
+        ];
+
+        let currentLine = 0;
+        const song = document.getElementById('song');
+
+        function startSong() {
+            song.currentTime = 38;
+            song.play();
+            updateLyrics();
+        }
+
+        function updateLyrics() {
+            setInterval(() => {
+                let songTime = song.currentTime;
+                if (currentLine < lyrics.length && songTime >= lyrics[currentLine].time + 38) {
+                    document.getElementById('display').innerText = lyrics[currentLine].text;
+                    currentLine++;
+                }
+                if (songTime >= lyrics[lyrics.length - 1].time + 38) {
+                    document.getElementById('display').innerText = "";
+                }
+            }, 50);
+        }
+
+        // Calculator Functions
+        let expression = "";
+
+        function appendToDisplay(value) {
+            expression += value;
+            document.getElementById('display').innerText = expression;
+        }
+
+        function clearDisplay() {
+            expression = "";
+            document.getElementById('display').innerText = "0";
+        }
+
+        function calculate() {
+            try {
+                let result = eval(expression);
+                expression = result;
+                document.getElementById('display').innerText = result;
+                startSong();
+            } catch (e) {
+                expression = "Error";
+                document.getElementById('display').innerText = expression;
+            }
+        }
+    </script>
+
+</body>
+</html>
