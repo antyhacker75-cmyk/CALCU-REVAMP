@@ -1,197 +1,670 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator</title>
-    <style>
-        /* Global Styles */
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #1a1a1a, #34495e);
-            color: white;
-            flex-direction: column;
-            text-align: center;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<style>
+    :root {
+        --accent: #1abc9c;
+        --accent-dark: #16a085;
+        --panel: #2c3e50;
+        --panel-2: #34495e;
+        --text: #ecf0f1;
+        --muted: rgba(236, 240, 241, .45);
+    }
 
-        /* Calculator Styling */
-        .calculator {
-            background: #2c3e50;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 350px;
-            transition: transform 0.3s ease-in-out;
-        }
+    * { box-sizing: border-box; }
 
-        .calculator:hover {
-            transform: scale(1.05);
-        }
+    body {
+        font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 24px 16px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        background: radial-gradient(circle at 50% 0%, #2c3e50 0%, #1a1a1a 65%);
+        color: var(--text);
+        text-align: center;
+        overflow-x: hidden;
+    }
 
-        /* Display Box */
-        .display {
-            width: 100;
-            padding: 20px;
-            font-size: 2em;
-            font-weight: bold;
-            background: #34495e;
-            border-radius: 10px;
-            color: #ecf0f1;
-            min-height: 60px;
-            word-wrap: break-word;
-            overflow-x: auto;
-            text-align: right;
-        }
+    /* ============ NOW PLAYING / LYRICS PANEL ============ */
+    .now-playing {
+        width: 350px;
+        max-width: 100%;
+        background: rgba(44, 62, 80, .82);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(26, 188, 156, .22);
+        border-radius: 16px;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, .38);
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(14px);
+        transition:
+            max-height .55s cubic-bezier(.22, 1, .36, 1),
+            opacity .4s ease,
+            transform .4s ease,
+            visibility 0s linear .55s,
+            margin .4s ease;
+        margin-bottom: 0;
+    }
+    .now-playing.visible {
+        max-height: 400px;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        margin-bottom: 14px;
+        transition-delay: 0s;
+    }
 
-        /* Button Grid Layout */
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
+    .np-inner { padding: 16px 18px 16px; }
 
-        /* Button Styles */
-        .buttons button {
-            padding: 20px;
-            font-size: 1.4em;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-            background-color: #1abc9c;
-            color: white;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-        }
+    .np-head {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        justify-content: center;
+        font-size: .78rem;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+    .pulse {
+        width: 8px; height: 8px; flex: none;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 1.8s infinite;
+    }
+    .now-playing.paused .pulse { animation-play-state: paused; opacity: .4; }
+    @keyframes pulse {
+        0%   { box-shadow: 0 0 0 0 rgba(26, 188, 156, .55); }
+        70%  { box-shadow: 0 0 0 9px rgba(26, 188, 156, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(26, 188, 156, 0); }
+    }
 
-        .buttons button:hover {
-            background-color: #16a085;
-            transform: translateY(-3px);
-        }
+    .lyric-current {
+        min-height: 3.1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 10px 0 4px;
+        font-size: 1.42rem;
+        font-weight: 700;
+        line-height: 1.32;
+    }
 
-        .buttons button:active {
-            background-color: #1abc9c;
-            transform: translateY(3px);
-        }
+    /* The karaoke fill: a gradient clipped to the text */
+    .karaoke {
+        display: inline-block;
+        --p: 0%;
+        background-image: linear-gradient(
+            90deg,
+            var(--accent) 0%,
+            #2ee6c4 var(--p),
+            rgba(236, 240, 241, .22) var(--p),
+            rgba(236, 240, 241, .22) 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
+    .karaoke.swap { animation: lineIn .45s cubic-bezier(.22, 1, .36, 1); }
+    @keyframes lineIn {
+        from { opacity: 0; transform: translateY(10px) scale(.97); }
+        to   { opacity: 1; transform: none; }
+    }
 
-        /* Responsive Design */
-        @media (max-width: 480px) {
-            .calculator {
-                width: 90%;
-                padding: 20px;
-            }
-            .display {
-                font-size: 1.8em;
-            }
-            .buttons button {
-                font-size: 1.1em;
-            }
-        }
-    </style>
+    .lyric-next {
+        font-size: .92rem;
+        color: var(--muted);
+        min-height: 1.4em;
+        text-align: center;
+        transition: opacity .35s ease;
+    }
+
+    .np-times {
+        display: flex;
+        justify-content: space-between;
+        font-size: .72rem;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+        margin-top: 12px;
+        margin-bottom: 6px;
+    }
+
+    .progress {
+        height: 4px;
+        border-radius: 99px;
+        background: rgba(255, 255, 255, .09);
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, var(--accent-dark), var(--accent), #2ee6c4);
+    }
+
+    .np-foot {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+        font-size: .72rem;
+        color: var(--muted);
+    }
+    .chip {
+        font: inherit;
+        font-size: .7rem;
+        padding: 5px 9px;
+        border-radius: 99px;
+        border: 1px solid rgba(255, 255, 255, .12);
+        background: rgba(255, 255, 255, .05);
+        color: var(--text);
+        cursor: pointer;
+        transition: background .2s, border-color .2s, transform .15s;
+    }
+    .chip:hover { background: rgba(26, 188, 156, .22); border-color: rgba(26, 188, 156, .5); }
+    .chip:active { transform: scale(.94); }
+    .chip b { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+    .np-hint {
+        margin-top: 9px;
+        font-size: .66rem;
+        color: rgba(236, 240, 241, .28);
+    }
+    @media (max-width: 420px) { .np-hint { display: none; } }
+
+    /* ============ CALCULATOR ============ */
+    .calculator {
+        background: var(--panel);
+        padding: 22px;
+        border-radius: 18px;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, .35);
+        width: 350px;
+        max-width: 100%;
+        transition: transform .3s ease;
+    }
+    .calculator:hover { transform: translateY(-2px); }
+
+    .display {
+        width: 100%;
+        padding: 18px 16px;
+        font-size: 2em;
+        font-weight: 700;
+        background: var(--panel-2);
+        border-radius: 12px;
+        color: var(--text);
+        min-height: 74px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        word-break: break-all;
+        overflow-x: auto;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        transition: color .2s;
+    }
+    .display.error { color: #ff7675; }
+
+    .buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .buttons button {
+        padding: 18px 0;
+        font-family: inherit;
+        font-size: 1.3em;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        color: #fff;
+        background: var(--panel-2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, .22);
+        transition: background .22s, transform .12s, box-shadow .22s;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .buttons button:hover { background: #3e5771; transform: translateY(-2px); }
+    .buttons button:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0, 0, 0, .25); }
+
+    .buttons button.op { background: #2f6f66; }
+    .buttons button.op:hover { background: #37857a; }
+
+    .buttons button.clear { background: #c0392b; }
+    .buttons button.clear:hover { background: #e04b3a; }
+
+    .buttons button.equals {
+        background: linear-gradient(145deg, var(--accent), var(--accent-dark));
+        font-weight: 700;
+    }
+    .buttons button.equals:hover { background: linear-gradient(145deg, #2ee6c4, var(--accent)); }
+
+    .buttons button.wide { grid-column: span 2; }
+
+    @media (max-width: 480px) {
+        .calculator { padding: 18px; }
+        .display { font-size: 1.7em; min-height: 66px; }
+        .buttons button { font-size: 1.1em; padding: 16px 0; }
+        .lyric-current { font-size: 1.18rem; }
+        .lyric-next { font-size: .82rem; }
+    }
+</style>
 </head>
 <body>
 
-    <!-- Audio Source -->
-    <audio id="song" preload="auto">
-        <source src="https://www.dropbox.com/scl/fi/8ml8ji46f46iwf378wene/spotify-Bulong-December-Avenue.m4a?rlkey=w3dvs5qcumdis2j83kas8omor&st=6g231ml7&raw=1" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+<!-- Audio Source -->
+<audio id="song" preload="auto">
+    <source src="https://www.dropbox.com/scl/fi/8ml8ji46f46iwf378wene/spotify-Bulong-December-Avenue.m4a?rlkey=w3dvs5qcumdis2j83kas8omor&st=6g231ml7&raw=1" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
 
-    <!-- Calculator -->
-    <div class="calculator">
-        <div class="display" id="display">0</div>
-        <div class="buttons">
-            <button onclick="clearDisplay()">C</button>
-            <button onclick="appendToDisplay('(')">(</button>
-            <button onclick="appendToDisplay(')')">)</button>
-            <button onclick="appendToDisplay('/')">/</button>
-            <button onclick="appendToDisplay('7')">7</button>
-            <button onclick="appendToDisplay('8')">8</button>
-            <button onclick="appendToDisplay('9')">9</button>
-            <button onclick="appendToDisplay('*')">*</button>
-            <button onclick="appendToDisplay('4')">4</button>
-            <button onclick="appendToDisplay('5')">5</button>
-            <button onclick="appendToDisplay('6')">6</button>
-            <button onclick="appendToDisplay('-')">-</button>
-            <button onclick="appendToDisplay('1')">1</button>
-            <button onclick="appendToDisplay('2')">2</button>
-            <button onclick="appendToDisplay('3')">3</button>
-            <button onclick="appendToDisplay('+')">+</button>
-            <button onclick="appendToDisplay('0')">0</button>
-            <button onclick="appendToDisplay('.')">.</button>
-            <button onclick="calculate()">=</button>
+<!-- Live lyrics panel -->
+<section class="now-playing" id="nowPlaying" aria-hidden="true">
+    <div class="np-inner">
+        <div class="np-head">
+            <span class="pulse"></span>
+            <span>Bulong — December Avenue</span>
         </div>
+
+        <div class="lyric-current">
+            <span class="karaoke" id="lyricCurrent"></span>
+        </div>
+        <div class="lyric-next" id="lyricNext"></div>
+
+        <div class="np-times">
+            <span id="npTime">0:00</span>
+            <span id="npDur">0:00</span>
+        </div>
+        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+        <div class="np-foot">
+            <button class="chip" id="nudgeBack" type="button" title="Show lyrics earlier">◀ earlier</button>
+            <span>sync <b id="offsetLabel">-2.00s</b></span>
+            <button class="chip" id="nudgeFwd" type="button" title="Show lyrics later">later ▶</button>
+        </div>
+        <div class="np-hint">Space play/pause · ← → seek 5s · [ ] nudge sync</div>
     </div>
+</section>
 
-    <script>
-        // Lyrics Data
-        const lyrics = [
-            { time: 0.82 - 2, text: "Hindi masabi ang nararamdaman" },
-            { time: 12.92 - 2, text: "Hindi makalapit, sadyang nanginginig na lang" },
-            { time: 20.63 - 2, text: "Mga kamay na sabik sa piling mo" },
-            { time: 26.51 - 2, text: "Ang iyong matang walang mintis" },
-            { time: 31.27 - 2, text: "Sa pagtigil ng aking mundo" },
-            { time: 35.52 - 2, text: "Ako'y alipin ng pag-ibig mo" },
-            { time: 42.13 - 2, text: "Handang ibigin ang 'sang tulad mo" },
-            { time: 49.63 - 2, text: "Hangga't ang puso mo'y sa akin lang" },
-            { time: 53.88 - 2, text: "Hindi ka na malilinlang" },
-            { time: 57.45 - 2, text: "Ikaw ang ilaw sa dilim" },
-            { time: 62.99 - 2, text: "At ang liwanag ng mga bituin" },
-        ];
+<!-- Calculator -->
+<div class="calculator">
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+        <button type="button" class="clear" data-action="clear">C</button>
+        <button type="button" class="op" data-value="(">(</button>
+        <button type="button" class="op" data-value=")">)</button>
+        <button type="button" class="op" data-value="/">/</button>
 
-        let currentLine = 0;
-        const song = document.getElementById('song');
+        <button type="button" data-value="7">7</button>
+        <button type="button" data-value="8">8</button>
+        <button type="button" data-value="9">9</button>
+        <button type="button" class="op" data-value="*">*</button>
 
-        function startSong() {
-            song.currentTime = 38;
-            song.play();
-            updateLyrics();
+        <button type="button" data-value="4">4</button>
+        <button type="button" data-value="5">5</button>
+        <button type="button" data-value="6">6</button>
+        <button type="button" class="op" data-value="-">-</button>
+
+        <button type="button" data-value="1">1</button>
+        <button type="button" data-value="2">2</button>
+        <button type="button" data-value="3">3</button>
+        <button type="button" class="op" data-value="+">+</button>
+
+        <button type="button" class="wide" data-value="0">0</button>
+        <button type="button" data-value=".">.</button>
+        <button type="button" class="equals" data-action="equals">=</button>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    /* =========================================================
+       1. CONFIG & LYRICS
+       =========================================================
+       startAt  : second in the audio file where the sung part begins
+       offset   : global shift for ALL lyric lines (tune live with
+                  the "earlier / later" buttons or the [ ] keys)
+       ========================================================= */
+    const CONFIG = {
+        startAt: 38,          // playback jumps here when you press "="
+        offset: -2,           // seconds; negative = lyrics appear earlier
+        maxLineDuration: 6    // how long a line takes to fully "fill"
+    };
+
+    // Times are relative to CONFIG.startAt (i.e. 0 = first word)
+    const LYRICS = [
+        { time: 0.82,  text: "Hindi masabi ang nararamdaman" },
+        { time: 12.92, text: "Hindi makalapit, sadyang nanginginig na lang" },
+        { time: 20.63, text: "Mga kamay na sabik sa piling mo" },
+        { time: 26.51, text: "Ang iyong matang walang mintis" },
+        { time: 31.27, text: "Sa pagtigil ng aking mundo" },
+        { time: 35.52, text: "Ako'y alipin ng pag-ibig mo" },
+        { time: 42.13, text: "Handang ibigin ang 'sang tulad mo" },
+        { time: 49.63, text: "Hangga't ang puso mo'y sa akin lang" },
+        { time: 53.88, text: "Hindi ka na malilinlang" },
+        { time: 57.45, text: "Ikaw ang ilaw sa dilim" },
+        { time: 62.99, text: "At ang liwanag ng mga bituin" }
+    ];
+
+    /* =========================================================
+       2. ELEMENT REFERENCES
+       ========================================================= */
+    const song    = document.getElementById('song');
+    const panel   = document.getElementById('nowPlaying');
+    const elCur   = document.getElementById('lyricCurrent');
+    const elNext  = document.getElementById('lyricNext');
+    const elBar   = document.getElementById('progressBar');
+    const elTime  = document.getElementById('npTime');
+    const elDur   = document.getElementById('npDur');
+    const elOff   = document.getElementById('offsetLabel');
+    const display = document.getElementById('display');
+
+    /* =========================================================
+       3. LYRICS ENGINE  (requestAnimationFrame = true real-time)
+       ========================================================= */
+    let rafId      = null;   // animation frame handle (only ONE ever runs)
+    let lineIndex  = -2;     // -2 forces the first paint
+    let started    = false;  // has the easter egg been triggered?
+    let lastFill   = -1;     // avoids redundant style writes
+
+    const lineStart = i => LYRICS[i].time + CONFIG.offset;
+
+    function findLineIndex(t) {
+        let idx = -1;
+        for (let i = 0; i < LYRICS.length; i++) {
+            if (t >= lineStart(i)) idx = i;
+            else break;                      // array is sorted → safe to stop
+        }
+        return idx;
+    }
+
+    function fmt(sec) {
+        if (!isFinite(sec) || sec < 0) sec = 0;
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ':' + String(s).padStart(2, '0');
+    }
+
+    function render() {
+        const t = song.currentTime - CONFIG.startAt;   // time inside the song
+        const i = findLineIndex(t);
+
+        /* --- text only changes when the active line changes --- */
+        if (i !== lineIndex) {
+            lineIndex = i;
+
+            if (i === -1) {
+                elCur.textContent  = '';
+                elCur.style.setProperty('--p', '0%');
+                elNext.textContent = LYRICS[0].text;
+            } else {
+                elCur.textContent  = LYRICS[i].text;
+                elNext.textContent = (i + 1 < LYRICS.length) ? LYRICS[i + 1].text : '';
+
+                // restart the entrance animation
+                elCur.classList.remove('swap');
+                void elCur.offsetWidth;      // force reflow
+                elCur.classList.add('swap');
+            }
+            lastFill = -1;                   // force a fill refresh
         }
 
-        function updateLyrics() {
-            setInterval(() => {
-                let songTime = song.currentTime;
-                if (currentLine < lyrics.length && songTime >= lyrics[currentLine].time + 38) {
-                    document.getElementById('display').innerText = lyrics[currentLine].text;
-                    currentLine++;
-                }
-                if (songTime >= lyrics[lyrics.length - 1].time + 38) {
-                    document.getElementById('display').innerText = "";
-                }
-            }, 50);
-        }
+        /* --- karaoke fill (updates every frame) --- */
+        if (i >= 0) {
+            const start     = lineStart(i);
+            const nextStart = (i + 1 < LYRICS.length) ? lineStart(i + 1) : Infinity;
+            const end       = Math.min(nextStart, start + CONFIG.maxLineDuration);
+            const span      = end - start;
 
-        // Calculator Functions
-        let expression = "";
+            const p = span > 0
+                ? Math.min(1, Math.max(0, (t - start) / span))
+                : 1;
 
-        function appendToDisplay(value) {
-            expression += value;
-            document.getElementById('display').innerText = expression;
-        }
-
-        function clearDisplay() {
-            expression = "";
-            document.getElementById('display').innerText = "0";
-        }
-
-        function calculate() {
-            try {
-                let result = eval(expression);
-                expression = result;
-                document.getElementById('display').innerText = result;
-                startSong();
-            } catch (e) {
-                expression = "Error";
-                document.getElementById('display').innerText = expression;
+            const pct = Math.round(p * 1000) / 10;
+            if (pct !== lastFill) {
+                lastFill = pct;
+                elCur.style.setProperty('--p', pct + '%');
             }
         }
-    </script>
+
+        /* --- progress bar + clock --- */
+        const dur = song.duration;
+        if (isFinite(dur) && dur > 0) {
+            elBar.style.width  = ((song.currentTime / dur) * 100).toFixed(2) + '%';
+            elTime.textContent = fmt(song.currentTime);
+            elDur.textContent  = fmt(dur);
+        }
+    }
+
+    function loop() {
+        render();
+        rafId = requestAnimationFrame(loop);
+    }
+
+    function startLoop() {
+        if (rafId === null) rafId = requestAnimationFrame(loop);
+    }
+
+    function stopLoop() {
+        if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+    }
+
+    /* =========================================================
+       4. PLAYBACK CONTROL
+       ========================================================= */
+    function showPanel() {
+        panel.classList.add('visible');
+        panel.setAttribute('aria-hidden', 'false');
+    }
+
+    function hidePanel() {
+        panel.classList.remove('visible');
+        panel.setAttribute('aria-hidden', 'true');
+    }
+
+    function startSong() {
+        if (started) return;         // already playing → don't restart
+        started = true;
+
+        const begin = () => {
+            // jump past the intro (guard against short/unknown duration)
+            try {
+                const max = isFinite(song.duration) ? Math.max(0, song.duration - 1) : CONFIG.startAt;
+                song.currentTime = Math.min(CONFIG.startAt, max);
+            } catch (_) { /* ignore seek errors */ }
+
+            const p = song.play();
+            if (p && typeof p.catch === 'function') {
+                p.catch(err => {
+                    console.warn('Playback was blocked:', err);
+                    started = false;
+                });
+            }
+
+            showPanel();
+            startLoop();
+            render();
+        };
+
+        if (song.readyState >= 1) {          // HAVE_METADATA
+            begin();
+        } else {
+            showPanel();
+            elNext.textContent = 'Loading…';
+            song.addEventListener('loadedmetadata', begin, { once: true });
+        }
+    }
+
+    /* keep the pulse dot in sync with playback state */
+    song.addEventListener('play',  () => panel.classList.remove('paused'));
+    song.addEventListener('pause', () => panel.classList.add('paused'));
+
+    song.addEventListener('ended', () => {
+        stopLoop();
+        started = false;
+        lineIndex = -2;
+        lastFill = -1;
+        hidePanel();
+    });
+
+    song.addEventListener('error', () => {
+        elCur.textContent  = '';
+        elNext.textContent = '⚠ Could not load the audio';
+        showPanel();
+        started = false;
+    });
+
+    /* =========================================================
+       5. SYNC / SEEK HELPERS
+       ========================================================= */
+    function nudge(delta) {
+        CONFIG.offset = Math.round((CONFIG.offset + delta) * 100) / 100;
+        elOff.textContent = (CONFIG.offset >= 0 ? '+' : '') + CONFIG.offset.toFixed(2) + 's';
+        lineIndex = -2;      // force a full re-evaluation
+        render();
+    }
+
+    function seek(delta) {
+        if (!isFinite(song.duration)) return;
+        song.currentTime = Math.min(
+            Math.max(0, song.currentTime + delta),
+            song.duration - 0.1
+        );
+        render();
+    }
+
+    document.getElementById('nudgeBack').addEventListener('click', () => nudge(-0.25));
+    document.getElementById('nudgeFwd').addEventListener('click',  () => nudge(0.25));
+
+    document.addEventListener('keydown', e => {
+        if (!started) return;
+        if (e.code === 'Space') {
+            e.preventDefault();
+            song.paused ? song.play() : song.pause();
+        } else if (e.code === 'ArrowLeft') {
+            e.preventDefault(); seek(-5);
+        } else if (e.code === 'ArrowRight') {
+            e.preventDefault(); seek(5);
+        } else if (e.key === '[') {
+            nudge(-0.25);
+        } else if (e.key === ']') {
+            nudge(0.25);
+        }
+    });
+
+    /* =========================================================
+       6. CALCULATOR
+       ========================================================= */
+    let expression   = '';
+    let justEvaluated = false;
+    const OPS = '+-*/';
+
+    function paint() {
+        display.textContent = expression === '' ? '0' : expression;
+    }
+
+    function appendToDisplay(value) {
+        // after "=", a digit starts a new sum, an operator continues with the result
+        if (justEvaluated) {
+            if (!OPS.includes(value)) expression = '';
+            justEvaluated = false;
+        }
+
+        const last = expression.slice(-1);
+
+        // collapse repeated operators (allow "5*-3")
+        if (OPS.includes(value) && OPS.includes(last)) {
+            const negativeAfterMulDiv = value === '-' && (last === '*' || last === '/');
+            if (!negativeAfterMulDiv) {
+                expression = expression.slice(0, -1) + value;
+                paint();
+                return;
+            }
+        }
+
+        // one decimal point per number
+        if (value === '.') {
+            const tail = expression.split(/[+\-*/()]/).pop();
+            if (tail.includes('.')) return;
+            if (tail === '') expression += '0';
+        }
+
+        expression += value;
+        paint();
+    }
+
+    function clearDisplay() {
+        expression = '';
+        justEvaluated = false;
+        display.classList.remove('error');
+        paint();
+    }
+
+    function showError() {
+        expression = '';
+        justEvaluated = true;
+        display.textContent = 'Error';
+        display.classList.add('error');
+        setTimeout(() => display.classList.remove('error'), 800);
+    }
+
+    function calculate() {
+        const expr = expression.trim();
+        if (!expr) return;
+
+        // only allow characters a calculator can produce
+        if (!/^[0-9+\-*/().\s]+$/.test(expr)) { showError(); return; }
+
+        try {
+            const raw = Function('"use strict";return (' + expr + ')')();
+            if (typeof raw !== 'number' || !isFinite(raw)) { showError(); return; }
+
+            // trim floating-point noise (0.30000000000000004 → 0.3)
+            const clean = Number.isInteger(raw) ? raw : Number(raw.toPrecision(12));
+
+            expression    = String(clean);
+            justEvaluated = true;
+            display.textContent = expression;
+
+            // 🎵 the easter egg
+            startSong();
+        } catch (_) {
+            showError();
+        }
+    }
+
+    document.querySelectorAll('.buttons button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const { value, action } = btn.dataset;
+            if (value !== undefined)      appendToDisplay(value);
+            else if (action === 'clear')  clearDisplay();
+            else if (action === 'equals') calculate();
+        });
+    });
+
+    // initial UI state
+    elOff.textContent = (CONFIG.offset >= 0 ? '+' : '') + CONFIG.offset.toFixed(2) + 's';
+    paint();
+})();
+</script>
 
 </body>
 </html>
