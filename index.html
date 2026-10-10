@@ -29,147 +29,7 @@
         text-align: center;
         overflow-x: hidden;
     }
-    /* ============ NOW PLAYING / LYRICS PANEL ============ */
-    .now-playing {
-        width: 350px;
-        max-width: 100%;
-        background: rgba(44, 62, 80, .82);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border: 1px solid rgba(26, 188, 156, .22);
-        border-radius: 16px;
-        box-shadow: 0 14px 34px rgba(0, 0, 0, .38);
-        overflow: hidden;
-        max-height: 0;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(14px);
-        transition:
-            max-height .55s cubic-bezier(.22, 1, .36, 1),
-            opacity .4s ease,
-            transform .4s ease,
-            visibility 0s linear .55s,
-            margin .4s ease;
-        margin-bottom: 0;
-    }
-    .now-playing.visible {
-        max-height: 400px;
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-        margin-bottom: 14px;
-        transition-delay: 0s;
-    }
-    .np-inner { padding: 16px 18px 16px; }
-    .np-head {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        justify-content: center;
-        font-size: .78rem;
-        letter-spacing: .06em;
-        text-transform: uppercase;
-        color: var(--muted);
-    }
-    .pulse {
-        width: 8px; height: 8px; flex: none;
-        border-radius: 50%;
-        background: var(--accent);
-        animation: pulse 1.8s infinite;
-    }
-    .now-playing.paused .pulse { animation-play-state: paused; opacity: .4; }
-    @keyframes pulse {
-        0%   { box-shadow: 0 0 0 0 rgba(26, 188, 156, .55); }
-        70%  { box-shadow: 0 0 0 9px rgba(26, 188, 156, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(26, 188, 156, 0); }
-    }
-    .lyric-current {
-        min-height: 3.1em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 10px 0 4px;
-        font-size: 1.42rem;
-        font-weight: 700;
-        line-height: 1.32;
-    }
-    .karaoke {
-        display: inline-block;
-        --p: 0%;
-        background-image: linear-gradient(
-            90deg,
-            var(--accent) 0%,
-            #2ee6c4 var(--p),
-            rgba(236, 240, 241, .22) var(--p),
-            rgba(236, 240, 241, .22) 100%
-        );
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-    }
-    .karaoke.swap { animation: lineIn .45s cubic-bezier(.22, 1, .36, 1); }
-    @keyframes lineIn {
-        from { opacity: 0; transform: translateY(10px) scale(.97); }
-        to   { opacity: 1; transform: none; }
-    }
-    .lyric-next {
-        font-size: .92rem;
-        color: var(--muted);
-        min-height: 1.4em;
-        text-align: center;
-        transition: opacity .35s ease;
-    }
-    .np-times {
-        display: flex;
-        justify-content: space-between;
-        font-size: .72rem;
-        color: var(--muted);
-        font-variant-numeric: tabular-nums;
-        margin-top: 12px;
-        margin-bottom: 6px;
-    }
-    .progress {
-        height: 4px;
-        border-radius: 99px;
-        background: rgba(255, 255, 255, .09);
-        overflow: hidden;
-    }
-    .progress-bar {
-        height: 100%;
-        width: 0%;
-        border-radius: 99px;
-        background: linear-gradient(90deg, var(--accent-dark), var(--accent), #2ee6c4);
-    }
-    .np-foot {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 12px;
-        font-size: .72rem;
-        color: var(--muted);
-    }
-    .chip {
-        font: inherit;
-        font-size: .7rem;
-        padding: 5px 9px;
-        border-radius: 99px;
-        border: 1px solid rgba(255, 255, 255, .12);
-        background: rgba(255, 255, 255, .05);
-        color: var(--text);
-        cursor: pointer;
-        transition: background .2s, border-color .2s, transform .15s;
-    }
-    .chip:hover { background: rgba(26, 188, 156, .22); border-color: rgba(26, 188, 156, .5); }
-    .chip:active { transform: scale(.94); }
-    .chip b { color: var(--accent); font-variant-numeric: tabular-nums; }
-    .np-hint {
-        margin-top: 9px;
-        font-size: .66rem;
-        color: rgba(236, 240, 241, .28);
-    }
-    @media (max-width: 420px) { .np-hint { display: none; } }
+
     /* ============ CALCULATOR ============ */
     .calculator {
         background: var(--panel);
@@ -181,6 +41,7 @@
         transition: transform .3s ease;
     }
     .calculator:hover { transform: translateY(-2px); }
+
     .display {
         width: 100%;
         padding: 18px 16px;
@@ -189,7 +50,7 @@
         background: var(--panel-2);
         border-radius: 12px;
         color: var(--text);
-        min-height: 74px;
+        min-height: 90px;
         display: flex;
         align-items: center;
         justify-content: flex-end;
@@ -197,9 +58,53 @@
         overflow-x: auto;
         text-align: right;
         font-variant-numeric: tabular-nums;
-        transition: color .2s;
+        transition: color .2s, font-size .3s, justify-content .3s;
     }
+
+    /* Style for when lyrics are showing */
+    .display.lyrics-mode {
+        justify-content: center;
+        text-align: center;
+        font-size: 1.25em;
+        line-height: 1.4;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-x: hidden;
+        padding: 20px 12px;
+        scrollbar-width: none;
+    }
+    .display.lyrics-mode::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Dynamic font sizes for long lyrics */
+    .display.lyrics-mode .karaoke.small { font-size: 0.8em; }
+    .display.lyrics-mode .karaoke.xsmall { font-size: 0.65em; }
+
     .display.error { color: #ff7675; }
+
+    /* Karaoke fill effect */
+    .karaoke {
+        display: inline-block;
+        --p: 0%;
+        background-image: linear-gradient(
+            90deg,
+            var(--accent) 0%,
+            #2ee6c4 var(--p),
+            rgba(236, 240, 241, .25) var(--p),
+            rgba(236, 240, 241, .25) 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
+    .karaoke.swap { animation: lineIn .45s cubic-bezier(.22, 1, .36, 1); }
+    @keyframes lineIn {
+        from { opacity: 0; transform: translateY(10px) scale(.97); }
+        to   { opacity: 1; transform: none; }
+    }
+
     .buttons {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -222,60 +127,35 @@
     }
     .buttons button:hover { background: #3e5771; transform: translateY(-2px); }
     .buttons button:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0, 0, 0, .25); }
+
     .buttons button.op { background: #2f6f66; }
     .buttons button.op:hover { background: #37857a; }
+
     .buttons button.clear { background: #c0392b; }
     .buttons button.clear:hover { background: #e04b3a; }
+
     .buttons button.equals {
         background: linear-gradient(145deg, var(--accent), var(--accent-dark));
         font-weight: 700;
     }
     .buttons button.equals:hover { background: linear-gradient(145deg, #2ee6c4, var(--accent)); }
     .buttons button.wide { grid-column: span 2; }
+
     @media (max-width: 480px) {
         .calculator { padding: 18px; }
-        .display { font-size: 1.7em; min-height: 66px; }
+        .display { font-size: 1.7em; min-height: 80px; }
         .buttons button { font-size: 1.1em; padding: 16px 0; }
-        .lyric-current { font-size: 1.18rem; }
-        .lyric-next { font-size: .82rem; }
+        .display.lyrics-mode { font-size: 1.15em; }
     }
 </style>
 </head>
 <body>
 
-<!-- Audio Source: Bulong by December Avenue (from Internet Archive) -->
+<!-- Audio Source: Bulong by December Avenue -->
 <audio id="song" preload="auto">
     <source src="https://archive.org/download/gloc-9-feat.-ebe-dancel-sirena-official-music-video/December%20Avenue%20-%20Bulong%20%28OFFICIAL%20MUSIC%20VIDEO%29.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
 </audio>
-
-<!-- Live lyrics panel -->
-<section class="now-playing" id="nowPlaying" aria-hidden="true">
-    <div class="np-inner">
-        <div class="np-head">
-            <span class="pulse"></span>
-            <span>Bulong — December Avenue</span>
-        </div>
-
-        <div class="lyric-current">
-            <span class="karaoke" id="lyricCurrent"></span>
-        </div>
-        <div class="lyric-next" id="lyricNext"></div>
-
-        <div class="np-times">
-            <span id="npTime">0:00</span>
-            <span id="npDur">0:00</span>
-        </div>
-        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-
-        <div class="np-foot">
-            <button class="chip" id="nudgeBack" type="button" title="Show lyrics earlier">◀ earlier</button>
-            <span>sync <b id="offsetLabel">-2.00s</b></span>
-            <button class="chip" id="nudgeFwd" type="button" title="Show lyrics later">later ▶</button>
-        </div>
-        <div class="np-hint">Space play/pause · ← → seek 5s · [ ] nudge sync</div>
-    </div>
-</section>
 
 <!-- Calculator -->
 <div class="calculator">
@@ -315,41 +195,66 @@
        1. CONFIG & LYRICS
        ========================================================= */
     const CONFIG = {
-        startAt: 38,          // playback jumps here when you press "="
-        offset: -2,           // seconds; negative = lyrics appear earlier
-        maxLineDuration: 6    // how long a line takes to fully "fill"
+        startAt: 37.64,       // playback jumps here when you press "="
+        offset: 0,            // seconds; adjust live with the buttons
+        maxLineDuration: 8    // how long a line takes to fully "fill"
     };
 
-    // Times are relative to CONFIG.startAt (i.e. 0 = first word)
+    // Times are absolute from the beginning of the audio file.
     const LYRICS = [
-        { time: 0.82,  text: "Hindi masabi ang nararamdaman" },
-        { time: 12.92, text: "Hindi makalapit, sadyang nanginginig na lang" },
-        { time: 20.63, text: "Mga kamay na sabik sa piling mo" },
-        { time: 26.51, text: "Ang iyong matang walang mintis" },
-        { time: 31.27, text: "Sa pagtigil ng aking mundo" },
-        { time: 35.52, text: "Ako'y alipin ng pag-ibig mo" },
-        { time: 42.13, text: "Handang ibigin ang 'sang tulad mo" },
-        { time: 49.63, text: "Hangga't ang puso mo'y sa akin lang" },
-        { time: 53.88, text: "Hindi ka na malilinlang" },
-        { time: 57.45, text: "Ikaw ang ilaw sa dilim" },
-        { time: 62.99, text: "At ang liwanag ng mga bituin" }
+        // --- Verse 1 ---
+        { time: 37.64, text: "Hindi masabi ang nararamdaman" },
+        { time: 44.64, text: "Hindi makalapit" },
+        { time: 48.24, text: "Sadyang nanginginig na lang" },
+        { time: 52.16, text: "Mga kamay na sabik sa piling mo" },
+        { time: 58.31, text: "Ang iyong matang walang mintis" },
+        { time: 61.91, text: "Sa pagtigil ng aking mundo" },
+
+        // --- Chorus 1 ---
+        { time: 66.40, text: "Ako'y alipin ng pag-ibig mo" },
+        { time: 73.18, text: "Handang ibigin ang isang tulad mo" },
+        { time: 80.36, text: "Hangga't ang puso mo'y sa akin lang" },
+        { time: 85.01, text: "Hindi ka na malilinlang" },
+        { time: 88.63, text: "Ikaw ang ilaw sa dilim" },
+        { time: 91.99, text: "At ang liwanag ng mga bituin" },
+
+        // --- Verse 2 ---
+        { time: 108.80, text: "Hindi mapakali" },
+        { time: 112.23, text: "Hanggang tingin na lang" },
+        { time: 115.33, text: "Bumubulong sa'yong tabi" },
+        { time: 119.39, text: "Sadyang walang makapantay" },
+        { time: 123.22, text: "Sa kagandahang inuukit mo sa isip ko" },
+
+        // --- Chorus 2 ---
+        { time: 130.44, text: "Ako'y alipin ng pag-ibig mo" },
+        { time: 137.11, text: "Handang ibigin ang isang tulad mo" },
+        { time: 144.36, text: "Hangga't ang puso mo'y sa akin lang" },
+        { time: 149.01, text: "Hindi ka na malilinlang" },
+        { time: 152.65, text: "Ikaw ang ilaw sa dilim" },
+        { time: 155.99, text: "At ang liwanag ng mga bituin" },
+
+        // --- Chorus 3 (final) ---
+        { time: 186.87, text: "Ako'y alipin ng pag-ibig mo" },
+        { time: 193.99, text: "Handang ibigin ang isang tulad mo" },
+        { time: 200.98, text: "Hangga't ang puso mo'y sa akin lang" },
+        { time: 205.43, text: "Hindi ka na malilinlang" },
+        { time: 209.43, text: "Ikaw ang ilaw sa dilim" },
+        { time: 212.78, text: "At ang liwanag ng mga bituin" },
+
+        // --- Outro ---
+        { time: 221.78, text: "Ng mga bituin" },
+        { time: 228.91, text: "Ng mga bituin" },
+        { time: 236.16, text: "Ng mga bituin" }
     ];
 
     /* =========================================================
        2. ELEMENT REFERENCES
        ========================================================= */
     const song    = document.getElementById('song');
-    const panel   = document.getElementById('nowPlaying');
-    const elCur   = document.getElementById('lyricCurrent');
-    const elNext  = document.getElementById('lyricNext');
-    const elBar   = document.getElementById('progressBar');
-    const elTime  = document.getElementById('npTime');
-    const elDur   = document.getElementById('npDur');
-    const elOff   = document.getElementById('offsetLabel');
     const display = document.getElementById('display');
 
     /* =========================================================
-       3. LYRICS ENGINE  (requestAnimationFrame = true real-time)
+       3. LYRICS ENGINE
        ========================================================= */
     let rafId      = null;
     let lineIndex  = -2;
@@ -367,35 +272,39 @@
         return idx;
     }
 
-    function fmt(sec) {
-        if (!isFinite(sec) || sec < 0) sec = 0;
-        const m = Math.floor(sec / 60);
-        const s = Math.floor(sec % 60);
-        return m + ':' + String(s).padStart(2, '0');
-    }
-
     function render() {
-        const t = song.currentTime - CONFIG.startAt;
+        const t = song.currentTime;
         const i = findLineIndex(t);
 
+        // Only update the DOM when the lyric line actually changes
         if (i !== lineIndex) {
             lineIndex = i;
 
             if (i === -1) {
-                elCur.textContent  = '';
-                elCur.style.setProperty('--p', '0%');
-                elNext.textContent = LYRICS[0].text;
+                display.innerHTML = '';
             } else {
-                elCur.textContent  = LYRICS[i].text;
-                elNext.textContent = (i + 1 < LYRICS.length) ? LYRICS[i + 1].text : '';
+                const text = LYRICS[i].text;
+                const length = text.length;
+                
+                // Dynamically adjust font size based on text length
+                let sizeClass = '';
+                if (length > 32) sizeClass = 'xsmall';
+                else if (length > 24) sizeClass = 'small';
 
-                elCur.classList.remove('swap');
-                void elCur.offsetWidth;
-                elCur.classList.add('swap');
+                // Inject the lyric line with the appropriate size class
+                display.innerHTML = `<span class="karaoke ${sizeClass}" id="karaokeSpan">${text}</span>`;
+                
+                const karaokeSpan = document.getElementById('karaokeSpan');
+                if (karaokeSpan) {
+                    karaokeSpan.classList.remove('swap');
+                    void karaokeSpan.offsetWidth;
+                    karaokeSpan.classList.add('swap');
+                }
             }
             lastFill = -1;
         }
 
+        // Update the karaoke fill progress smoothly
         if (i >= 0) {
             const start     = lineStart(i);
             const nextStart = (i + 1 < LYRICS.length) ? lineStart(i + 1) : Infinity;
@@ -409,15 +318,11 @@
             const pct = Math.round(p * 1000) / 10;
             if (pct !== lastFill) {
                 lastFill = pct;
-                elCur.style.setProperty('--p', pct + '%');
+                const karaokeSpan = document.getElementById('karaokeSpan');
+                if (karaokeSpan) {
+                    karaokeSpan.style.setProperty('--p', pct + '%');
+                }
             }
-        }
-
-        const dur = song.duration;
-        if (isFinite(dur) && dur > 0) {
-            elBar.style.width  = ((song.currentTime / dur) * 100).toFixed(2) + '%';
-            elTime.textContent = fmt(song.currentTime);
-            elDur.textContent  = fmt(dur);
         }
     }
 
@@ -440,35 +345,27 @@
     /* =========================================================
        4. PLAYBACK CONTROL
        ========================================================= */
-    function showPanel() {
-        panel.classList.add('visible');
-        panel.setAttribute('aria-hidden', 'false');
-    }
-
-    function hidePanel() {
-        panel.classList.remove('visible');
-        panel.setAttribute('aria-hidden', 'true');
-    }
-
     function startSong() {
         if (started) return;
         started = true;
+
+        // Switch the display to lyric mode
+        display.classList.add('lyrics-mode');
 
         const begin = () => {
             try {
                 const max = isFinite(song.duration) ? Math.max(0, song.duration - 1) : CONFIG.startAt;
                 song.currentTime = Math.min(CONFIG.startAt, max);
-            } catch (_) { /* ignore seek errors */ }
+            } catch (_) { /* ignore */ }
 
             const p = song.play();
             if (p && typeof p.catch === 'function') {
                 p.catch(err => {
                     console.warn('Playback was blocked:', err);
                     started = false;
+                    display.classList.remove('lyrics-mode');
                 });
             }
-
-            showPanel();
             startLoop();
             render();
         };
@@ -476,40 +373,29 @@
         if (song.readyState >= 1) {
             begin();
         } else {
-            showPanel();
-            elNext.textContent = 'Loading…';
+            display.innerHTML = 'Loading...';
             song.addEventListener('loadedmetadata', begin, { once: true });
         }
     }
-
-    song.addEventListener('play',  () => panel.classList.remove('paused'));
-    song.addEventListener('pause', () => panel.classList.add('paused'));
 
     song.addEventListener('ended', () => {
         stopLoop();
         started = false;
         lineIndex = -2;
         lastFill = -1;
-        hidePanel();
+        display.classList.remove('lyrics-mode');
+        display.textContent = '0';
     });
 
     song.addEventListener('error', () => {
-        elCur.textContent  = '';
-        elNext.textContent = '⚠ Could not load the audio';
-        showPanel();
+        display.innerHTML = '⚠ Audio Error';
+        display.classList.remove('lyrics-mode');
         started = false;
     });
 
     /* =========================================================
-       5. SYNC / SEEK HELPERS
+       5. SYNC / SEEK HELPERS (Keyboard Shortcuts)
        ========================================================= */
-    function nudge(delta) {
-        CONFIG.offset = Math.round((CONFIG.offset + delta) * 100) / 100;
-        elOff.textContent = (CONFIG.offset >= 0 ? '+' : '') + CONFIG.offset.toFixed(2) + 's';
-        lineIndex = -2;
-        render();
-    }
-
     function seek(delta) {
         if (!isFinite(song.duration)) return;
         song.currentTime = Math.min(
@@ -518,9 +404,6 @@
         );
         render();
     }
-
-    document.getElementById('nudgeBack').addEventListener('click', () => nudge(-0.25));
-    document.getElementById('nudgeFwd').addEventListener('click',  () => nudge(0.25));
 
     document.addEventListener('keydown', e => {
         if (!started) return;
@@ -531,10 +414,6 @@
             e.preventDefault(); seek(-5);
         } else if (e.code === 'ArrowRight') {
             e.preventDefault(); seek(5);
-        } else if (e.key === '[') {
-            nudge(-0.25);
-        } else if (e.key === ']') {
-            nudge(0.25);
         }
     });
 
@@ -549,7 +428,22 @@
         display.textContent = expression === '' ? '0' : expression;
     }
 
+    function stopLyrics() {
+        if (started) {
+            song.pause();
+            stopLoop();
+            started = false;
+            display.classList.remove('lyrics-mode');
+            expression = '';
+            justEvaluated = false;
+            lineIndex = -2;
+            lastFill = -1;
+        }
+    }
+
     function appendToDisplay(value) {
+        stopLyrics(); // Stop lyrics if user starts typing
+
         if (justEvaluated) {
             if (!OPS.includes(value)) expression = '';
             justEvaluated = false;
@@ -577,6 +471,7 @@
     }
 
     function clearDisplay() {
+        stopLyrics();
         expression = '';
         justEvaluated = false;
         display.classList.remove('error');
@@ -607,6 +502,7 @@
             justEvaluated = true;
             display.textContent = expression;
 
+            // Trigger the song and lyrics
             startSong();
         } catch (_) {
             showError();
@@ -622,7 +518,6 @@
         });
     });
 
-    elOff.textContent = (CONFIG.offset >= 0 ? '+' : '') + CONFIG.offset.toFixed(2) + 's';
     paint();
 })();
 </script>
